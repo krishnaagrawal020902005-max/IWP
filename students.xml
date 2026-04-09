@@ -1,0 +1,81 @@
+<!-- students.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<students xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="students.xsd">
+
+  <student id="S001">
+    <name>Aryan Sharma</name>
+    <branch>Computer Science</branch>
+    <semester>6</semester>
+    <email>aryan.sharma@university.edu</email>
+    <phone>9876543210</phone>
+    <cgpa>8.7</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Data Structures</subject>
+      <subject>Operating Systems</subject>
+      <subject>Web Programming</subject>
+    </subjects>
+  </student>
+
+  <student id="S002">
+    <name>Priya Patel</name>
+    <branch>Information Technology</branch>
+    <semester>4</semester>
+    <email>priya.patel@university.edu</email>
+    <phone>9812345678</phone>
+    <cgpa>9.1</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Database Management</subject>
+      <subject>Computer Networks</subject>
+      <subject>Java Programming</subject>
+    </subjects>
+  </student>
+
+  <student id="S003">
+    <name>Rahul Verma</name>
+    <branch>Electronics</branch>
+    <semester>8</semester>
+    <email>rahul.verma@university.edu</email>
+    <phone>9934567890</phone>
+    <cgpa>7.5</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>VLSI Design</subject>
+      <subject>Embedded Systems</subject>
+      <subject>Signal Processing</subject>
+    </subjects>
+  </student>
+
+  <student id="S004">
+    <name>Sneha Gupta</name>
+    <branch>Computer Science</branch>
+    <semester>2</semester>
+    <email>sneha.gupta@university.edu</email>
+    <phone>9856789012</phone>
+    <cgpa>8.2</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Programming in C</subject>
+      <subject>Mathematics</subject>
+      <subject>Physics</subject>
+    </subjects>
+  </student>
+
+  <student id="S005">
+    <name>Vikram Singh</name>
+    <branch>Mechanical</branch>
+    <semester>6</semester>
+    <email>vikram.singh@university.edu</email>
+    <phone>9778901234</phone>
+    <cgpa>6.9</cgpa>
+    <status>Inactive</status>
+    <subjects>
+      <subject>Thermodynamics</subject>
+      <subject>Fluid Mechanics</subject>
+      <subject>Machine Design</subject>
+    </subjects>
+  </student>
+
+</students>

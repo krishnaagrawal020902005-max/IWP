@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Root element -->
+  <xs:element name="students">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="student" type="StudentType" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Student type definition -->
+  <xs:complexType name="StudentType">
+    <xs:sequence>
+      <xs:element name="n"        type="xs:string"/>
+      <xs:element name="branch"   type="xs:string"/>
+      <xs:element name="semester" type="SemesterType"/>
+      <xs:element name="email"    type="EmailType"/>
+      <xs:element name="phone"    type="PhoneType"/>
+      <xs:element name="cgpa"     type="CGPAType"/>
+      <xs:element name="status"   type="StatusType"/>
+      <xs:element name="subjects" type="SubjectsType"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+  </xs:complexType>
+
+  <!-- Semester: 1-8 -->
+  <xs:simpleType name="SemesterType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="8"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Email pattern -->
+  <xs:simpleType name="EmailType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Phone: 10 digits -->
+  <xs:simpleType name="PhoneType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{10}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- CGPA: 0.0 to 10.0 -->
+  <xs:simpleType name="CGPAType">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+      <xs:maxInclusive value="10.0"/>
+      <xs:fractionDigits value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Status: Active or Inactive -->
+  <xs:simpleType name="StatusType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Active"/>
+      <xs:enumeration value="Inactive"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Subjects list -->
+  <xs:complexType name="SubjectsType">
+    <xs:sequence>
+      <xs:element name="subject" type="xs:string" minOccurs="1" maxOccurs="10"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduTrack — Student XML Viewer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+    :root {
+      --bg:#0f172a; --card:#1e293b; --border:#334155;
+      --accent:#38bdf8; --text:#e2e8f0; --muted:#64748b;
+      --success:#34d399; --warning:#fbbf24;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Raleway',sans-serif; }
+
+    header {
+      background:linear-gradient(90deg,#0f172a,#1e3a5f);
+      padding:24px 40px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .logo { font-size:1.6rem; font-weight:800; letter-spacing:3px; color:var(--accent); }
+    .logo span { color:var(--text); }
+    .xml-badge {
+      background:rgba(56,189,248,.15); border:1px solid var(--accent);
+      color:var(--accent); padding:4px 12px; font-size:0.7rem;
+      font-family:'Fira Code',monospace; letter-spacing:2px;
+    }
+
+    .main { display:grid; grid-template-columns:1fr 340px; gap:0; min-height:calc(100vh - 73px); }
+
+    /* STUDENTS LIST */
+    .list-panel { padding:30px; border-right:1px solid var(--border); }
+    .panel-header {
+      display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
+    }
+    .panel-header h2 { font-size:0.75rem; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+    .search-input {
+      background:var(--card); border:1px solid var(--border); color:var(--text);
+      padding:8px 14px; font-family:'Raleway',sans-serif; font-size:0.85rem;
+      outline:none; width:200px;
+    }
+    .search-input:focus { border-color:var(--accent); }
+    .search-input::placeholder { color:var(--muted); }
+
+    /* FILTER TABS */
+    .filter-tabs { display:flex; gap:6px; margin-bottom:20px; }
+    .tab {
+      padding:5px 14px; border:1px solid var(--border); background:transparent;
+      color:var(--muted); font-family:'Raleway',sans-serif; font-size:0.75rem;
+      font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer;
+      transition:all .15s;
+    }
+    .tab.active, .tab:hover { background:var(--accent); color:#0f172a; border-color:var(--accent); }
+
+    /* STUDENT CARDS */
+    .student-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+    .s-card {
+      background:var(--card); border:1px solid var(--border); border-radius:4px;
+      padding:20px; cursor:pointer; transition:all .2s;
+      position:relative; overflow:hidden;
+    }
+    .s-card::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+      background:var(--accent); transform:scaleY(0); transition:transform .2s; transform-origin:bottom;
+    }
+    .s-card:hover::before, .s-card.selected::before { transform:scaleY(1); }
+    .s-card:hover, .s-card.selected { border-color:var(--accent); }
+    .s-card.selected { background:#1a2d42; }
+    .s-id { font-family:'Fira Code',monospace; font-size:0.65rem; color:var(--muted); margin-bottom:8px; }
+    .s-name { font-size:1rem; font-weight:700; margin-bottom:4px; }
+    .s-branch { font-size:0.75rem; color:var(--accent); margin-bottom:12px; letter-spacing:1px; }
+    .s-meta { display:flex; justify-content:space-between; }
+    .s-meta span { font-size:0.75rem; color:var(--muted); }
+    .cgpa-badge {
+      font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:2px;
+      font-family:'Fira Code',monospace;
+    }
+    .cgpa-high { background:rgba(52,211,153,.15); color:var(--success); }
+    .cgpa-mid { background:rgba(251,191,36,.15); color:var(--warning); }
+    .cgpa-low { background:rgba(248,113,113,.15); color:#f87171; }
+    .status-dot {
+      display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:4px;
+    }
+    .status-active { background:var(--success); }
+    .status-inactive { background:#f87171; }
+
+    /* DETAIL PANEL */
+    .detail-panel { padding:30px; }
+    .no-select { text-align:center; padding:60px 20px; color:var(--muted); }
+    .no-select .icon { font-size:3rem; margin-bottom:14px; }
+    .detail-header { margin-bottom:24px; }
+    .detail-id { font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--accent); margin-bottom:6px; }
+    .detail-name { font-size:1.5rem; font-weight:800; margin-bottom:4px; }
+    .detail-branch { font-size:0.8rem; color:var(--accent); letter-spacing:2px; text-transform:uppercase; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0; }
+    .d-field { background:rgba(255,255,255,0.04); padding:12px 14px; border-radius:2px; border:1px solid var(--border); }
+    .d-field label { font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:4px; }
+    .d-field span { font-size:0.9rem; font-weight:600; font-family:'Fira Code',monospace; }
+    .subjects-section h4 { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .subject-tag {
+      display:inline-block; background:rgba(56,189,248,.1); border:1px solid rgba(56,189,248,.3);
+      color:var(--accent); padding:4px 12px; font-size:0.75rem; border-radius:2px; margin:0 4px 6px 0;
+    }
+
+    /* XML PANEL */
+    .xml-panel { margin-top:24px; }
+    .xml-panel h4 { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+    .xml-code {
+      background:#0d1117; border:1px solid var(--border); padding:16px;
+      font-family:'Fira Code',monospace; font-size:0.72rem; line-height:1.7;
+      overflow-x:auto; white-space:pre; color:#e6edf3;
+    }
+    .xml-tag { color:#7ee787; }
+    .xml-attr { color:#79c0ff; }
+    .xml-val { color:#ffa657; }
+    .xml-text { color:#e6edf3; }
+
+    /* STATS */
+    .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-bottom:1px solid var(--border); }
+    .stat { padding:16px 20px; border-right:1px solid var(--border); text-align:center; }
+    .stat:last-child { border-right:none; }
+    .stat .val { font-size:1.4rem; font-weight:800; color:var(--accent); font-family:'Fira Code',monospace; }
+    .stat .lbl { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Edu<span>Track</span></div>
+    <div style="font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-top:2px">XML-BASED STUDENT REGISTRY</div>
+  </div>
+  <div class="xml-badge">&lt;XML/&gt; + XSD</div>
+</header>
+
+<div id="stats-bar" class="stats-bar"></div>
+
+<div class="main">
+  <div class="list-panel">
+    <div class="panel-header">
+      <h2>Student Records</h2>
+      <input class="search-input" type="text" id="search" placeholder="Search name, branch..." oninput="filterStudents()"/>
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filterTab('all',this)">All</button>
+      <button class="tab" onclick="filterTab('Active',this)">Active</button>
+      <button class="tab" onclick="filterTab('Inactive',this)">Inactive</button>
+    </div>
+    <div class="student-grid" id="student-grid"></div>
+  </div>
+
+  <div class="detail-panel" id="detail-panel">
+    <div class="no-select">
+      <div class="icon">📋</div>
+      <p>Select a student to view full details</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Embedded XML data (would normally be fetched from students.xml)
+const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
+<students>
+  <student id="S001">
+    <n>Aryan Sharma</n>
+    <branch>Computer Science</branch>
+    <semester>6</semester>
+    <email>aryan.sharma@university.edu</email>
+    <phone>9876543210</phone>
+    <cgpa>8.7</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Data Structures</subject>
+      <subject>Operating Systems</subject>
+      <subject>Web Programming</subject>
+    </subjects>
+  </student>
+  <student id="S002">
+    <n>Priya Patel</n>
+    <branch>Information Technology</branch>
+    <semester>4</semester>
+    <email>priya.patel@university.edu</email>
+    <phone>9812345678</phone>
+    <cgpa>9.1</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Database Management</subject>
+      <subject>Computer Networks</subject>
+      <subject>Java Programming</subject>
+    </subjects>
+  </student>
+  <student id="S003">
+    <n>Rahul Verma</n>
+    <branch>Electronics</branch>
+    <semester>8</semester>
+    <email>rahul.verma@university.edu</email>
+    <phone>9934567890</phone>
+    <cgpa>7.5</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>VLSI Design</subject>
+      <subject>Embedded Systems</subject>
+      <subject>Signal Processing</subject>
+    </subjects>
+  </student>
+  <student id="S004">
+    <n>Sneha Gupta</n>
+    <branch>Computer Science</branch>
+    <semester>2</semester>
+    <email>sneha.gupta@university.edu</email>
+    <phone>9856789012</phone>
+    <cgpa>8.2</cgpa>
+    <status>Active</status>
+    <subjects>
+      <subject>Programming in C</subject>
+      <subject>Mathematics</subject>
+      <subject>Physics</subject>
+    </subjects>
+  </student>
+  <student id="S005">
+    <n>Vikram Singh</n>
+    <branch>Mechanical</branch>
+    <semester>6</semester>
+    <email>vikram.singh@university.edu</email>
+    <phone>9778901234</phone>
+    <cgpa>6.9</cgpa>
+    <status>Inactive</status>
+    <subjects>
+      <subject>Thermodynamics</subject>
+      <subject>Fluid Mechanics</subject>
+      <subject>Machine Design</subject>
+    </subjects>
+  </student>
+</students>`;
+
+// Parse XML
+const parser = new DOMParser();
+const xmlDoc = parser.parseFromString(xmlData, 'text/xml');
+let students = [];
+let filterStatus = 'all';
+
+function loadStudents() {
+  const nodes = xmlDoc.querySelectorAll('student');
+  students = Array.from(nodes).map(s => ({
+    id: s.getAttribute('id'),
+    name: s.querySelector('n')?.textContent || '',
+    branch: s.querySelector('branch')?.textContent || '',
+    semester: s.querySelector('semester')?.textContent || '',
+    email: s.querySelector('email')?.textContent || '',
+    phone: s.querySelector('phone')?.textContent || '',
+    cgpa: parseFloat(s.querySelector('cgpa')?.textContent || 0),
+    status: s.querySelector('status')?.textContent || '',
+    subjects: Array.from(s.querySelectorAll('subject')).map(sub=>sub.textContent),
+  }));
+  renderStats();
+  renderGrid(students);
+}
+
+function renderStats() {
+  const active = students.filter(s=>s.status==='Active').length;
+  const avgCGPA = (students.reduce((a,s)=>a+s.cgpa,0)/students.length).toFixed(2);
+  const branches = new Set(students.map(s=>s.branch)).size;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="val">${students.length}</div><div class="lbl">Total Students</div></div>
+    <div class="stat"><div class="val">${active}</div><div class="lbl">Active</div></div>
+    <div class="stat"><div class="val">${avgCGPA}</div><div class="lbl">Avg CGPA</div></div>
+    <div class="stat"><div class="val">${branches}</div><div class="lbl">Branches</div></div>
+  `;
+}
+
+function cgpaClass(c) { return c>=8.5?'cgpa-high':c>=7?'cgpa-mid':'cgpa-low'; }
+
+function renderGrid(list) {
+  document.getElementById('student-grid').innerHTML = list.length === 0
+    ? '<p style="color:var(--muted);font-size:.85rem">No students found.</p>'
+    : list.map(s=>`
+    <div class="s-card" onclick="showDetail('${s.id}',this)">
+      <div class="s-id">${s.id}</div>
+      <div class="s-name">${s.name}</div>
+      <div class="s-branch">${s.branch}</div>
+      <div class="s-meta">
+        <span><span class="status-dot status-${s.status.toLowerCase()}"></span>${s.status}</span>
+        <span class="cgpa-badge ${cgpaClass(s.cgpa)}">${s.cgpa}</span>
+      </div>
+    </div>`).join('');
+}
+
+function filterTab(status, btn) {
+  filterStatus = status;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+function filterStudents() { applyFilter(); }
+function applyFilter() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let res = students;
+  if (filterStatus !== 'all') res = res.filter(s=>s.status===filterStatus);
+  if (q) res = res.filter(s=>s.name.toLowerCase().includes(q)||s.branch.toLowerCase().includes(q)||s.id.toLowerCase().includes(q));
+  renderGrid(res);
+}
+
+function showDetail(id, cardEl) {
+  document.querySelectorAll('.s-card').forEach(c=>c.classList.remove('selected'));
+  cardEl.classList.add('selected');
+  const s = students.find(x=>x.id===id);
+  if (!s) return;
+
+  const xmlSnippet = `<span class="xml-tag">&lt;student</span> <span class="xml-attr">id</span>=<span class="xml-val">"${s.id}"</span><span class="xml-tag">&gt;</span>
+  <span class="xml-tag">&lt;n&gt;</span><span class="xml-text">${s.name}</span><span class="xml-tag">&lt;/n&gt;</span>
+  <span class="xml-tag">&lt;branch&gt;</span><span class="xml-text">${s.branch}</span><span class="xml-tag">&lt;/branch&gt;</span>
+  <span class="xml-tag">&lt;cgpa&gt;</span><span class="xml-text">${s.cgpa}</span><span class="xml-tag">&lt;/cgpa&gt;</span>
+  <span class="xml-tag">&lt;status&gt;</span><span class="xml-text">${s.status}</span><span class="xml-tag">&lt;/status&gt;</span>
+<span class="xml-tag">&lt;/student&gt;</span>`;
+
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-id">${s.id}</div>
+      <div class="detail-name">${s.name}</div>
+      <div class="detail-branch">${s.branch}</div>
+    </div>
+    <div class="detail-grid">
+      <div class="d-field"><label>Semester</label><span>${s.semester}</span></div>
+      <div class="d-field"><label>CGPA</label><span class="cgpa-badge ${cgpaClass(s.cgpa)}" style="font-size:.9rem">${s.cgpa}</span></div>
+      <div class="d-field"><label>Phone</label><span>${s.phone}</span></div>
+      <div class="d-field"><label>Status</label><span><span class="status-dot status-${s.status.toLowerCase()}"></span>${s.status}</span></div>
+      <div class="d-field" style="grid-column:1/-1"><label>Email</label><span>${s.email}</span></div>
+    </div>
+    <div class="subjects-section">
+      <h4>Enrolled Subjects</h4>
+      ${s.subjects.map(sub=>`<span class="subject-tag">${sub}</span>`).join('')}
+    </div>
+    <div class="xml-panel">
+      <h4>XML Node</h4>
+      <div class="xml-code">${xmlSnippet}</div>
+    </div>
+  `;
+}
+
+loadStudents();
+</script>
+</body>
+</html>

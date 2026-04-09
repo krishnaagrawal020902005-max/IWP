@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElementVault — Periodic Table</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=DM+Mono&display=swap');
+    :root {
+      --bg: #f5f0eb;
+      --card: #fff;
+      --text: #1a1a2e;
+      --muted: #888;
+      --border: #e0dada;
+      --alkali: #ff6b6b;
+      --alkaline: #ffa94d;
+      --transition-m: #748ffc;
+      --lanthanide: #da77f2;
+      --actinide: #f783ac;
+      --metalloid: #63e6be;
+      --nonmetal: #74c0fc;
+      --halogen: #a9e34b;
+      --noble: #ffd43b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Josefin Sans',sans-serif; }
+
+    header { padding:30px 40px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text); }
+    .logo { font-size:2rem; font-weight:700; letter-spacing:4px; text-transform:uppercase; }
+    .subtitle { font-size:0.8rem; font-weight:300; letter-spacing:3px; color:var(--muted); margin-top:2px; }
+
+    .filter-bar {
+      padding:20px 40px;
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .filter-bar label { font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+    .filter-btn {
+      padding:6px 14px; border:2px solid var(--text); background:transparent;
+      font-family:'Josefin Sans',sans-serif; font-size:0.75rem; font-weight:600;
+      letter-spacing:1px; cursor:pointer; text-transform:uppercase;
+      transition:all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active { background:var(--text); color:var(--bg); }
+    .search-wrap { margin-left:auto; }
+    .search-wrap input {
+      background:transparent; border:2px solid var(--text);
+      padding:7px 16px; font-family:'Josefin Sans',sans-serif; font-size:0.85rem;
+      outline:none; width:200px;
+    }
+
+    .table-wrap { padding:20px 20px 10px; overflow-x:auto; }
+    .ptable { display:grid; grid-template-columns:repeat(18,1fr); gap:3px; min-width:1000px; }
+    .element {
+      aspect-ratio:1; padding:4px 3px;
+      border:1px solid rgba(0,0,0,0.1);
+      cursor:pointer; transition:transform .15s, box-shadow .15s;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:relative; overflow:hidden;
+    }
+    .element:hover { transform:scale(1.15); z-index:10; box-shadow:0 4px 20px rgba(0,0,0,0.25); }
+    .element .num { font-size:0.45rem; font-weight:600; opacity:.7; }
+    .element .sym { font-size:1rem; font-weight:700; text-align:center; line-height:1; }
+    .element .name { font-size:0.35rem; text-align:center; opacity:.8; }
+    .element .mass { font-size:0.3rem; text-align:center; opacity:.6; font-family:'DM Mono',monospace; }
+    .empty { background:transparent; border:none; }
+
+    /* colors */
+    .alkali-metal { background:var(--alkali); }
+    .alkaline-earth { background:var(--alkaline); }
+    .transition { background:var(--transition-m); color:#fff; }
+    .lanthanide { background:var(--lanthanide); }
+    .actinide { background:var(--actinide); }
+    .metalloid { background:var(--metalloid); }
+    .nonmetal { background:var(--nonmetal); }
+    .halogen { background:var(--halogen); }
+    .noble-gas { background:var(--noble); }
+    .unknown { background:#ccc; }
+
+    /* LEGEND */
+    .legend {
+      padding:10px 20px 20px;
+      display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+    }
+    .leg-item { display:flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:600; letter-spacing:1px; }
+    .leg-box { width:14px; height:14px; border:1px solid rgba(0,0,0,0.2); }
+
+    /* MODAL */
+    .modal-bg {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      z-index:100; justify-content:center; align-items:center;
+    }
+    .modal-bg.open { display:flex; }
+    .modal {
+      background:var(--card); border:3px solid var(--text);
+      padding:40px; max-width:400px; width:90%;
+      animation: pop .2s ease;
+    }
+    @keyframes pop { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal .big-sym {
+      font-size:5rem; font-weight:700; line-height:1;
+      border-bottom:3px solid var(--text); margin-bottom:20px; padding-bottom:10px;
+    }
+    .modal h2 { font-size:1.5rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; }
+    .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
+    .modal-field label { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; }
+    .modal-field span { font-size:0.95rem; font-weight:600; font-family:'DM Mono',monospace; }
+    .close-btn {
+      margin-top:24px; padding:10px 30px; background:var(--text); color:var(--bg);
+      border:none; font-family:'Josefin Sans',sans-serif; font-size:0.85rem;
+      font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">ElementVault</div>
+    <div class="subtitle">Interactive Periodic Table of Elements</div>
+  </div>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search element..." oninput="filterElements()" />
+  </div>
+</header>
+
+<div class="filter-bar">
+  <label>Filter:</label>
+  <button class="filter-btn active" onclick="filterCat('',this)">All</button>
+  <button class="filter-btn" onclick="filterCat('alkali-metal',this)">Alkali</button>
+  <button class="filter-btn" onclick="filterCat('alkaline-earth',this)">Alkaline Earth</button>
+  <button class="filter-btn" onclick="filterCat('transition',this)">Transition</button>
+  <button class="filter-btn" onclick="filterCat('nonmetal',this)">Nonmetal</button>
+  <button class="filter-btn" onclick="filterCat('noble-gas',this)">Noble Gas</button>
+  <button class="filter-btn" onclick="filterCat('halogen',this)">Halogen</button>
+  <button class="filter-btn" onclick="filterCat('metalloid',this)">Metalloid</button>
+</div>
+
+<div class="table-wrap">
+  <div class="ptable" id="ptable"></div>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-box" style="background:var(--alkali)"></div>Alkali Metal</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--alkaline)"></div>Alkaline Earth</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--transition-m)"></div>Transition Metal</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--nonmetal)"></div>Nonmetal</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--noble)"></div>Noble Gas</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--halogen)"></div>Halogen</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--metalloid)"></div>Metalloid</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--lanthanide)"></div>Lanthanide</div>
+  <div class="leg-item"><div class="leg-box" style="background:var(--actinide)"></div>Actinide</div>
+</div>
+
+<div class="modal-bg" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="big-sym" id="m-sym"></div>
+    <div id="m-num" style="font-size:.8rem;letter-spacing:3px;color:var(--muted)"></div>
+    <h2 id="m-name"></h2>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Atomic Mass</label><span id="m-mass"></span></div>
+      <div class="modal-field"><label>Category</label><span id="m-cat"></span></div>
+      <div class="modal-field"><label>Period</label><span id="m-period"></span></div>
+      <div class="modal-field"><label>Group</label><span id="m-group"></span></div>
+      <div class="modal-field"><label>State at 25°C</label><span id="m-state"></span></div>
+      <div class="modal-field"><label>Electronegativity</label><span id="m-en"></span></div>
+    </div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<script>
+const elements = [
+  {n:1,sym:"H",name:"Hydrogen",mass:"1.008",cat:"nonmetal",period:1,group:1,state:"Gas",en:"2.20"},
+  {n:2,sym:"He",name:"Helium",mass:"4.003",cat:"noble-gas",period:1,group:18,state:"Gas",en:"—"},
+  {n:3,sym:"Li",name:"Lithium",mass:"6.941",cat:"alkali-metal",period:2,group:1,state:"Solid",en:"0.98"},
+  {n:4,sym:"Be",name:"Beryllium",mass:"9.012",cat:"alkaline-earth",period:2,group:2,state:"Solid",en:"1.57"},
+  {n:5,sym:"B",name:"Boron",mass:"10.81",cat:"metalloid",period:2,group:13,state:"Solid",en:"2.04"},
+  {n:6,sym:"C",name:"Carbon",mass:"12.01",cat:"nonmetal",period:2,group:14,state:"Solid",en:"2.55"},
+  {n:7,sym:"N",name:"Nitrogen",mass:"14.01",cat:"nonmetal",period:2,group:15,state:"Gas",en:"3.04"},
+  {n:8,sym:"O",name:"Oxygen",mass:"16.00",cat:"nonmetal",period:2,group:16,state:"Gas",en:"3.44"},
+  {n:9,sym:"F",name:"Fluorine",mass:"19.00",cat:"halogen",period:2,group:17,state:"Gas",en:"3.98"},
+  {n:10,sym:"Ne",name:"Neon",mass:"20.18",cat:"noble-gas",period:2,group:18,state:"Gas",en:"—"},
+  {n:11,sym:"Na",name:"Sodium",mass:"22.99",cat:"alkali-metal",period:3,group:1,state:"Solid",en:"0.93"},
+  {n:12,sym:"Mg",name:"Magnesium",mass:"24.31",cat:"alkaline-earth",period:3,group:2,state:"Solid",en:"1.31"},
+  {n:13,sym:"Al",name:"Aluminium",mass:"26.98",cat:"transition",period:3,group:13,state:"Solid",en:"1.61"},
+  {n:14,sym:"Si",name:"Silicon",mass:"28.09",cat:"metalloid",period:3,group:14,state:"Solid",en:"1.90"},
+  {n:15,sym:"P",name:"Phosphorus",mass:"30.97",cat:"nonmetal",period:3,group:15,state:"Solid",en:"2.19"},
+  {n:16,sym:"S",name:"Sulfur",mass:"32.07",cat:"nonmetal",period:3,group:16,state:"Solid",en:"2.58"},
+  {n:17,sym:"Cl",name:"Chlorine",mass:"35.45",cat:"halogen",period:3,group:17,state:"Gas",en:"3.16"},
+  {n:18,sym:"Ar",name:"Argon",mass:"39.95",cat:"noble-gas",period:3,group:18,state:"Gas",en:"—"},
+  {n:19,sym:"K",name:"Potassium",mass:"39.10",cat:"alkali-metal",period:4,group:1,state:"Solid",en:"0.82"},
+  {n:20,sym:"Ca",name:"Calcium",mass:"40.08",cat:"alkaline-earth",period:4,group:2,state:"Solid",en:"1.00"},
+  {n:26,sym:"Fe",name:"Iron",mass:"55.85",cat:"transition",period:4,group:8,state:"Solid",en:"1.83"},
+  {n:29,sym:"Cu",name:"Copper",mass:"63.55",cat:"transition",period:4,group:11,state:"Solid",en:"1.90"},
+  {n:30,sym:"Zn",name:"Zinc",mass:"65.38",cat:"transition",period:4,group:12,state:"Solid",en:"1.65"},
+  {n:35,sym:"Br",name:"Bromine",mass:"79.90",cat:"halogen",period:4,group:17,state:"Liquid",en:"2.96"},
+  {n:36,sym:"Kr",name:"Krypton",mass:"83.80",cat:"noble-gas",period:4,group:18,state:"Gas",en:"3.00"},
+  {n:47,sym:"Ag",name:"Silver",mass:"107.87",cat:"transition",period:5,group:11,state:"Solid",en:"1.93"},
+  {n:50,sym:"Sn",name:"Tin",mass:"118.71",cat:"transition",period:5,group:14,state:"Solid",en:"1.96"},
+  {n:53,sym:"I",name:"Iodine",mass:"126.90",cat:"halogen",period:5,group:17,state:"Solid",en:"2.66"},
+  {n:54,sym:"Xe",name:"Xenon",mass:"131.29",cat:"noble-gas",period:5,group:18,state:"Gas",en:"2.60"},
+  {n:79,sym:"Au",name:"Gold",mass:"196.97",cat:"transition",period:6,group:11,state:"Solid",en:"2.54"},
+  {n:80,sym:"Hg",name:"Mercury",mass:"200.59",cat:"transition",period:6,group:12,state:"Liquid",en:"2.00"},
+  {n:82,sym:"Pb",name:"Lead",mass:"207.20",cat:"transition",period:6,group:14,state:"Solid",en:"2.33"},
+  {n:86,sym:"Rn",name:"Radon",mass:"(222)",cat:"noble-gas",period:6,group:18,state:"Gas",en:"2.20"},
+  {n:92,sym:"U",name:"Uranium",mass:"238.03",cat:"actinide",period:7,group:3,state:"Solid",en:"1.38"},
+];
+
+let allElements = [...elements];
+let activeCat = '';
+
+function buildTable(elems) {
+  const table = document.getElementById('ptable');
+  table.innerHTML = '';
+  // build 7 rows x 18 cols grid (simplified display)
+  // For a simplified table, just render cards in a responsive grid
+  table.style.gridTemplateColumns = 'repeat(auto-fill,minmax(80px,1fr))';
+  elems.forEach(el => {
+    const div = document.createElement('div');
+    div.className = `element ${el.cat}`;
+    div.style.aspectRatio = 'unset';
+    div.style.padding = '10px 8px';
+    div.style.minWidth = '80px';
+    div.innerHTML = `
+      <div class="num">${el.n}</div>
+      <div class="sym" style="font-size:1.6rem;text-align:center;margin:6px 0">${el.sym}</div>
+      <div class="name" style="font-size:0.6rem;text-align:center">${el.name}</div>
+      <div class="mass" style="font-size:0.55rem;text-align:center">${el.mass}</div>
+    `;
+    div.onclick = () => openModal(el);
+    table.appendChild(div);
+  });
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = cat;
+  applyFilter();
+}
+function filterElements() { applyFilter(); }
+function applyFilter() {
+  const q = document.getElementById('search').value.toLowerCase();
+  let res = elements;
+  if (activeCat) res = res.filter(e=>e.cat===activeCat);
+  if (q) res = res.filter(e=>e.name.toLowerCase().includes(q)||e.sym.toLowerCase().includes(q)||String(e.n).includes(q));
+  buildTable(res);
+}
+
+function openModal(el) {
+  document.getElementById('m-sym').textContent = el.sym;
+  document.getElementById('m-num').textContent = `ATOMIC NUMBER ${el.n}`;
+  document.getElementById('m-name').textContent = el.name;
+  document.getElementById('m-mass').textContent = el.mass + ' u';
+  document.getElementById('m-cat').textContent = el.cat.replace(/-/g,' ');
+  document.getElementById('m-period').textContent = el.period;
+  document.getElementById('m-group').textContent = el.group;
+  document.getElementById('m-state').textContent = el.state;
+  document.getElementById('m-en').textContent = el.en;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e) { if(e.target.id==='modal') document.getElementById('modal').classList.remove('open'); }
+
+buildTable(elements);
+</script>
+</body>
+</html>

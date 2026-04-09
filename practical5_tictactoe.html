@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeoTac — Tic Tac Toe</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+    :root {
+      --bg:#0a0a1a; --card:#12122a; --border:#1e1e40;
+      --p1:#ff4da6; --p2:#4dc3ff; --win:#ffd700;
+      --text:#e8e8ff; --muted:#5a5a8a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:'Space Grotesk',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+    .stars {
+      position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0;
+    }
+    .star {
+      position:absolute; border-radius:50%; background:#fff; animation:twinkle 3s infinite;
+    }
+    @keyframes twinkle { 0%,100%{opacity:.1} 50%{opacity:.5} }
+
+    .container { position:relative; z-index:1; text-align:center; padding:30px 20px; }
+
+    h1 {
+      font-size:2.8rem; font-weight:700; letter-spacing:6px;
+      background:linear-gradient(90deg,var(--p1),var(--p2));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      margin-bottom:4px;
+    }
+    .sub { color:var(--muted); font-size:0.8rem; letter-spacing:3px; text-transform:uppercase; margin-bottom:30px; }
+
+    /* SCOREBOARD */
+    .scoreboard {
+      display:flex; gap:20px; justify-content:center; margin-bottom:24px;
+    }
+    .score-box {
+      background:var(--card); border:1px solid var(--border);
+      padding:16px 30px; border-radius:8px; min-width:100px;
+    }
+    .score-box.active { border-color:var(--p1); box-shadow:0 0 12px rgba(255,77,166,0.3); }
+    .score-box.p2.active { border-color:var(--p2); box-shadow:0 0 12px rgba(77,195,255,0.3); }
+    .score-box label { font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:6px; }
+    .score-box .score { font-size:2rem; font-weight:700; }
+    .score-box.p1 .score { color:var(--p1); }
+    .score-box.p2 .score { color:var(--p2); }
+    .score-box.draws .score { color:var(--muted); }
+
+    /* STATUS */
+    .status-bar {
+      margin-bottom:20px; padding:12px 24px;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:6px; font-size:0.9rem; letter-spacing:1px;
+      min-width:300px;
+      transition:all .3s;
+    }
+    .status-bar.p1-turn { border-color:var(--p1); color:var(--p1); }
+    .status-bar.p2-turn { border-color:var(--p2); color:var(--p2); }
+    .status-bar.win { border-color:var(--win); color:var(--win); font-weight:700; }
+    .status-bar.draw { color:var(--muted); }
+
+    /* BOARD */
+    .board {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:8px; width:300px; margin:0 auto 24px;
+    }
+    .cell {
+      aspect-ratio:1; background:var(--card);
+      border:1px solid var(--border); border-radius:8px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.5rem; font-weight:700; cursor:pointer;
+      transition:all .15s; user-select:none;
+    }
+    .cell:hover:not(.taken) { background:#1a1a35; border-color:var(--muted); transform:scale(1.03); }
+    .cell.taken { cursor:default; }
+    .cell.x { color:var(--p1); animation:popIn .2s ease; }
+    .cell.o { color:var(--p2); animation:popIn .2s ease; }
+    .cell.win-cell { background:rgba(255,215,0,0.1); border-color:var(--win) !important; box-shadow:0 0 12px rgba(255,215,0,0.3); }
+    @keyframes popIn { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
+
+    /* BUTTONS */
+    .btn-row { display:flex; gap:12px; justify-content:center; }
+    .btn {
+      padding:10px 28px; border-radius:6px; border:1px solid;
+      font-family:'Space Grotesk',sans-serif; font-size:0.85rem;
+      font-weight:600; letter-spacing:1px; cursor:pointer; transition:all .2s;
+    }
+    .btn-reset { background:transparent; border-color:var(--p1); color:var(--p1); }
+    .btn-reset:hover { background:var(--p1); color:var(--bg); }
+    .btn-ai { background:transparent; border-color:var(--p2); color:var(--p2); }
+    .btn-ai:hover { background:var(--p2); color:var(--bg); }
+    .btn-ai.active-ai { background:var(--p2); color:var(--bg); }
+
+    .mode-label { font-size:0.7rem; letter-spacing:1px; color:var(--muted); margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <h1>NEOTAC</h1>
+  <div class="sub">Tic Tac Toe — Space Edition</div>
+
+  <div class="scoreboard">
+    <div class="score-box p1 active" id="sb-p1">
+      <label>Player X</label>
+      <div class="score" id="score-x">0</div>
+    </div>
+    <div class="score-box draws">
+      <label>Draws</label>
+      <div class="score" id="score-d">0</div>
+    </div>
+    <div class="score-box p2" id="sb-p2">
+      <label>Player O</label>
+      <div class="score" id="score-o">0</div>
+    </div>
+  </div>
+
+  <div class="status-bar p1-turn" id="status">Player X's Turn</div>
+
+  <div class="board" id="board">
+    <div class="cell" onclick="move(0)"></div>
+    <div class="cell" onclick="move(1)"></div>
+    <div class="cell" onclick="move(2)"></div>
+    <div class="cell" onclick="move(3)"></div>
+    <div class="cell" onclick="move(4)"></div>
+    <div class="cell" onclick="move(5)"></div>
+    <div class="cell" onclick="move(6)"></div>
+    <div class="cell" onclick="move(7)"></div>
+    <div class="cell" onclick="move(8)"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-reset" onclick="resetGame()">New Game</button>
+    <button class="btn btn-ai" id="ai-btn" onclick="toggleAI()">vs AI</button>
+  </div>
+  <div class="mode-label" id="mode-label">2 PLAYER MODE</div>
+</div>
+
+<script>
+  // stars
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()*2+1;
+    s.style.cssText=`width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*3}s`;
+    starsEl.appendChild(s);
+  }
+
+  let board = Array(9).fill(null);
+  let current = 'X';
+  let gameOver = false;
+  let scores = {X:0,O:0,D:0};
+  let aiMode = false;
+
+  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+  function move(i) {
+    if(gameOver || board[i]) return;
+    place(i, current);
+    const w = checkWin();
+    if(w) { endGame('win', w); return; }
+    if(board.every(x=>x)) { endGame('draw'); return; }
+    current = current==='X'?'O':'X';
+    updateStatus();
+    if(aiMode && current==='O' && !gameOver) setTimeout(aiMove, 400);
+  }
+
+  function place(i, player) {
+    board[i] = player;
+    const cell = document.querySelectorAll('.cell')[i];
+    cell.textContent = player;
+    cell.classList.add('taken', player.toLowerCase());
+  }
+
+  function aiMove() {
+    // Simple: try to win, block, center, random
+    const tryWin = findBest('O');
+    const tryBlock = findBest('X');
+    let pick = tryWin ?? tryBlock ?? (board[4]===null?4:null) ?? board.reduce((a,v,i)=>v===null&&a===null?i:a,null);
+    if(pick===null) return;
+    place(pick, 'O');
+    const w=checkWin();
+    if(w){endGame('win',w);return;}
+    if(board.every(x=>x)){endGame('draw');return;}
+    current='X'; updateStatus();
+  }
+
+  function findBest(player) {
+    for(const [a,b,c] of wins) {
+      const line=[board[a],board[b],board[c]];
+      if(line.filter(x=>x===player).length===2 && line.includes(null)) {
+        return [a,b,c][line.indexOf(null)];
+      }
+    }
+    return null;
+  }
+
+  function checkWin() {
+    for(const combo of wins) {
+      const [a,b,c]=combo;
+      if(board[a]&&board[a]===board[b]&&board[a]===board[c]) return combo;
+    }
+    return null;
+  }
+
+  function endGame(type, combo) {
+    gameOver=true;
+    const status=document.getElementById('status');
+    if(type==='win') {
+      combo.forEach(i=>document.querySelectorAll('.cell')[i].classList.add('win-cell'));
+      status.className='status-bar win';
+      status.textContent=`Player ${current} Wins! 🎉`;
+      scores[current]++;
+      updateScores();
+    } else {
+      status.className='status-bar draw';
+      status.textContent="It's a Draw!";
+      scores.D++;
+      updateScores();
+    }
+    document.getElementById(current==='X'?'sb-p1':'sb-p2').classList.add('active');
+  }
+
+  function updateStatus() {
+    const status=document.getElementById('status');
+    status.className=`status-bar ${current==='X'?'p1-turn':'p2-turn'}`;
+    status.textContent=aiMode&&current==='O'?'AI is thinking...':`Player ${current}'s Turn`;
+    document.getElementById('sb-p1').classList.toggle('active',current==='X');
+    document.getElementById('sb-p2').classList.toggle('active',current==='O');
+  }
+
+  function updateScores() {
+    document.getElementById('score-x').textContent=scores.X;
+    document.getElementById('score-o').textContent=scores.O;
+    document.getElementById('score-d').textContent=scores.D;
+  }
+
+  function resetGame() {
+    board=Array(9).fill(null); current='X'; gameOver=false;
+    document.querySelectorAll('.cell').forEach(c=>{ c.textContent=''; c.className='cell'; });
+    updateStatus();
+  }
+
+  function toggleAI() {
+    aiMode=!aiMode;
+    const btn=document.getElementById('ai-btn');
+    btn.classList.toggle('active-ai',aiMode);
+    document.getElementById('mode-label').textContent=aiMode?'VS AI MODE':'2 PLAYER MODE';
+    resetGame();
+  }
+</script>
+</body>
+</html>

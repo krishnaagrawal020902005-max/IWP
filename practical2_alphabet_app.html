@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AlphaLab — Alphabet Explorer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+    :root {
+      --bg: #050f05;
+      --panel: #081408;
+      --green: #00ff41;
+      --dgreen: #00cc33;
+      --muted: #1a6e1a;
+      --border: #0d2e0d;
+      --text: #00e535;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.02) 2px, rgba(0,255,65,0.02) 4px);
+    }
+    header {
+      border-bottom: 1px solid var(--muted);
+      padding: 20px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem; letter-spacing: 4px; color: var(--green);
+      text-shadow: 0 0 10px var(--green);
+    }
+    .status {
+      font-size: 0.75rem; color: var(--muted);
+    }
+    .status span { color: var(--green); }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+    .prompt-area {
+      background: var(--panel);
+      border: 1px solid var(--muted);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    .prompt-line {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .prompt-line label {
+      color: var(--dgreen); font-size: 0.85rem; white-space: nowrap;
+    }
+    .prompt-line input {
+      background: transparent; border: none; border-bottom: 1px solid var(--muted);
+      color: var(--green); font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem; outline: none; flex: 1;
+      caret-color: var(--green);
+    }
+    .prompt-line input::placeholder { color: var(--muted); }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      background: transparent; border: 1px solid var(--green);
+      color: var(--green); font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; padding: 8px 20px; cursor: pointer;
+      letter-spacing: 1px; text-transform: uppercase;
+      transition: all .2s;
+    }
+    .btn:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 8px var(--green); }
+
+    /* OUTPUT */
+    .output-panel {
+      background: var(--panel); border: 1px solid var(--muted);
+      padding: 30px; margin-bottom: 30px;
+    }
+    .output-header {
+      font-size: 0.7rem; letter-spacing: 2px; color: var(--muted);
+      margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 10px;
+    }
+    #output-text {
+      font-size: 1.3rem; color: var(--green); line-height: 2;
+      word-break: break-all; min-height: 60px;
+    }
+    #output-text .char {
+      display: inline-block;
+      transition: color .1s;
+    }
+    #output-text .char:hover {
+      color: #fff;
+      text-shadow: 0 0 8px var(--green);
+      cursor: default;
+    }
+
+    /* GRID */
+    .grid-section h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem; letter-spacing: 3px;
+      color: var(--dgreen); margin-bottom: 20px;
+    }
+    .alpha-grid {
+      display: grid; grid-template-columns: repeat(13, 1fr); gap: 6px;
+    }
+    .alpha-cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; cursor: pointer;
+      transition: all .2s;
+      position: relative;
+    }
+    .alpha-cell:hover {
+      background: var(--green); color: var(--bg);
+      border-color: var(--green);
+      box-shadow: 0 0 10px var(--green);
+    }
+    .alpha-cell.upper { color: var(--green); }
+    .alpha-cell.lower { color: var(--dgreen); font-size: 0.85rem; }
+    .alpha-cell.active {
+      background: var(--green); color: var(--bg);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    /* INFO BOX */
+    #char-info {
+      margin-top: 30px;
+      background: var(--panel); border: 1px solid var(--muted); padding: 20px;
+      display: none;
+    }
+    #char-info h3 { font-family:'Orbitron',sans-serif; font-size:0.8rem; letter-spacing:3px; color:var(--muted); margin-bottom:14px; }
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .info-item label { font-size:0.65rem; letter-spacing:2px; color:var(--muted); display:block; margin-bottom:4px; }
+    .info-item span { font-size:1.3rem; color:var(--green); }
+
+    footer {
+      text-align: center; padding: 30px;
+      color: var(--muted); font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ALPHALAB</div>
+  <div class="status">SYSTEM: <span>ONLINE</span> | CHARSET: <span>ASCII</span> | MODE: <span>INTERACTIVE</span></div>
+</header>
+
+<div class="container">
+
+  <div class="prompt-area">
+    <div class="prompt-line">
+      <label>&gt; INPUT//</label>
+      <input type="text" id="userInput" placeholder="type anything..." maxlength="100" oninput="renderOutput()" />
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="toUpper()">UPPERCASE</button>
+      <button class="btn" onclick="toLower()">LOWERCASE</button>
+      <button class="btn" onclick="reverseStr()">REVERSE</button>
+      <button class="btn" onclick="sortStr()">SORT</button>
+      <button class="btn" onclick="countChars()">COUNT</button>
+      <button class="btn" onclick="clearAll()">CLEAR</button>
+    </div>
+  </div>
+
+  <div class="output-panel">
+    <div class="output-header">// OUTPUT STREAM</div>
+    <div id="output-text">—</div>
+    <div id="stats" style="margin-top:14px;font-size:0.75rem;color:var(--muted)"></div>
+  </div>
+
+  <div class="grid-section">
+    <h2>// ALPHABET MATRIX — CLICK TO INSERT</h2>
+    <div class="alpha-grid" id="alpha-grid"></div>
+  </div>
+
+  <div id="char-info">
+    <h3>// CHARACTER PROFILE</h3>
+    <div class="info-grid">
+      <div class="info-item"><label>CHAR</label><span id="ci-char">-</span></div>
+      <div class="info-item"><label>UPPERCASE</label><span id="ci-upper">-</span></div>
+      <div class="info-item"><label>LOWERCASE</label><span id="ci-lower">-</span></div>
+      <div class="info-item"><label>ASCII CODE</label><span id="ci-ascii">-</span></div>
+      <div class="info-item"><label>POSITION</label><span id="ci-pos">-</span></div>
+      <div class="info-item"><label>VOWEL/CONS</label><span id="ci-type">-</span></div>
+      <div class="info-item"><label>BINARY</label><span id="ci-bin">-</span></div>
+      <div class="info-item"><label>HEX</label><span id="ci-hex">-</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>ALPHALAB v1.0 — PRACTICAL 2 — INTERNET WEB PROGRAMMING</footer>
+
+<script>
+  function renderOutput(customText) {
+    const val = customText !== undefined ? customText : document.getElementById('userInput').value;
+    const out = document.getElementById('output-text');
+    if (!val) { out.innerHTML = '—'; document.getElementById('stats').textContent = ''; return; }
+    out.innerHTML = val.split('').map(c => `<span class="char">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+    const stats = document.getElementById('stats');
+    const vowels = (val.match(/[aeiouAEIOU]/g) || []).length;
+    const spaces = (val.match(/ /g) || []).length;
+    stats.textContent = `CHARS: ${val.length}  |  LETTERS: ${val.replace(/[^a-zA-Z]/g,'').length}  |  VOWELS: ${vowels}  |  SPACES: ${spaces}`;
+  }
+
+  function toUpper() {
+    const v = document.getElementById('userInput').value.toUpperCase();
+    renderOutput(v);
+  }
+  function toLower() {
+    const v = document.getElementById('userInput').value.toLowerCase();
+    renderOutput(v);
+  }
+  function reverseStr() {
+    const v = document.getElementById('userInput').value.split('').reverse().join('');
+    renderOutput(v);
+  }
+  function sortStr() {
+    const v = document.getElementById('userInput').value.split('').sort().join('');
+    renderOutput(v);
+  }
+  function countChars() {
+    const v = document.getElementById('userInput').value;
+    const freq = {};
+    for (let c of v) freq[c] = (freq[c]||0)+1;
+    const result = Object.entries(freq).map(([k,v])=>`${k}:${v}`).join(' | ');
+    document.getElementById('output-text').innerHTML = result || '—';
+    document.getElementById('stats').textContent = 'FREQUENCY COUNT';
+  }
+  function clearAll() {
+    document.getElementById('userInput').value = '';
+    renderOutput('');
+    document.querySelectorAll('.alpha-cell').forEach(c=>c.classList.remove('active'));
+    document.getElementById('char-info').style.display = 'none';
+  }
+
+  // Build alphabet grid
+  const grid = document.getElementById('alpha-grid');
+  const vowels = 'AEIOUaeiou';
+  for (let i = 65; i <= 90; i++) {
+    const c = String.fromCharCode(i);
+    const cell = document.createElement('div');
+    cell.className = 'alpha-cell upper';
+    cell.textContent = c;
+    cell.onclick = () => insertChar(c, cell);
+    grid.appendChild(cell);
+  }
+  for (let i = 97; i <= 122; i++) {
+    const c = String.fromCharCode(i);
+    const cell = document.createElement('div');
+    cell.className = 'alpha-cell lower';
+    cell.textContent = c;
+    cell.onclick = () => insertChar(c, cell);
+    grid.appendChild(cell);
+  }
+
+  function insertChar(ch, cell) {
+    document.querySelectorAll('.alpha-cell').forEach(c=>c.classList.remove('active'));
+    cell.classList.add('active');
+    document.getElementById('userInput').value += ch;
+    renderOutput();
+    // show char info
+    const info = document.getElementById('char-info');
+    info.style.display = 'block';
+    document.getElementById('ci-char').textContent = ch;
+    document.getElementById('ci-upper').textContent = ch.toUpperCase();
+    document.getElementById('ci-lower').textContent = ch.toLowerCase();
+    document.getElementById('ci-ascii').textContent = ch.charCodeAt(0);
+    document.getElementById('ci-pos').textContent = ch.toUpperCase().charCodeAt(0) - 64;
+    document.getElementById('ci-type').textContent = 'AEIOUaeiou'.includes(ch) ? 'VOWEL' : 'CONSONANT';
+    document.getElementById('ci-bin').textContent = ch.charCodeAt(0).toString(2).padStart(8,'0');
+    document.getElementById('ci-hex').textContent = '0x' + ch.charCodeAt(0).toString(16).toUpperCase();
+  }
+</script>
+</body>
+</html>
