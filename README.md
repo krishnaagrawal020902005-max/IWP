@@ -1,4 +1,5 @@
 Web Programming — Lab Practicals
+<br> <br>
 ![HTML](https://img.shields.io/badge/HTML-5-orange?style=flat-square)
 ![CSS](https://img.shields.io/badge/CSS-3-blue?style=flat-square)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=flat-square)
