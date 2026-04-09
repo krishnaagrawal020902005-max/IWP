@@ -230,8 +230,7 @@ perl practical11_perl_arrays.pl
 
 ## 👤 Author
 
-Built as part of the **Internet Web Programming (IWP)** lab course.
-
+(https://github.com/krishnaagrawal020902005-max)
 ---
 
 ## ⭐ Show Your Support
