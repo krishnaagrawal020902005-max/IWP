@@ -1,5 +1,4 @@
-<img width="1306" height="857" alt="Screenshot 2026-04-09 115840" src="https://github.com/user-attachments/assets/e6d24d8c-9e96-4fe4-8bca-26191e4684a3" /># 🌐 Internet Web Programming — Lab Practicals
-
+Web Programming — Lab Practicals
 ![HTML](https://img.shields.io/badge/HTML-5-orange?style=flat-square)
 ![CSS](https://img.shields.io/badge/CSS-3-blue?style=flat-square)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-yellow?style=flat-square)
