@@ -1,4 +1,4 @@
-# 🌐 Internet Web Programming — Lab Practicals
+<img width="1306" height="857" alt="Screenshot 2026-04-09 115840" src="https://github.com/user-attachments/assets/e6d24d8c-9e96-4fe4-8bca-26191e4684a3" /># 🌐 Internet Web Programming — Lab Practicals
 
 ![HTML](https://img.shields.io/badge/HTML-5-orange?style=flat-square)
 ![CSS](https://img.shields.io/badge/CSS-3-blue?style=flat-square)
@@ -73,58 +73,58 @@ Each practical is:
 ### Practical 1 — Train Booking Page
 > Basic HTML layout with a dark industrial theme, search form, results table, and booking buttons.
 
-![Train Booking Page](screenshots/p1_train_booking.png)
+<img width="1306" height="857" alt="Screenshot 2026-04-09 115840" src="https://github.com/user-attachments/assets/3ef298b4-32b8-4f53-919c-566672fca0a1" />
 
 ---
 
 ### Practical 2 — Alphabet Explorer App
 > Terminal-style interface with an interactive alphabet matrix, string operations, and ASCII character info.
 
-![Alphabet App](screenshots/p2_alphabet_app.png)
+<img width="1320" height="798" alt="Screenshot 2026-04-09 120011" src="https://github.com/user-attachments/assets/af0fee11-e4cf-495a-888a-4d1fa0606692" />
 
 ---
 
 ### Practical 3 — Periodic Table
 > Color-coded periodic table with category filters, search, and a click-to-expand element detail modal.
 
-![Periodic Table](screenshots/p3_periodic_table.png)
+<img width="1313" height="604" alt="Screenshot 2026-04-09 120038" src="https://github.com/user-attachments/assets/a656ce8e-4ce9-4085-851a-19cb6f8188bf" />
 
 ---
 
 ### Practical 4 — ISBN Validator
 > Dark warm-toned tool that validates ISBN-10 and ISBN-13 numbers using regex and check digit algorithms. Includes batch mode.
 
-![ISBN Validator](screenshots/p4_isbn_validator.png)
+<img width="1303" height="721" alt="Screenshot 2026-04-09 120225" src="https://github.com/user-attachments/assets/e0192a4f-9e3d-4c9a-8c4a-48c4ef6f920a" />
 
 ---
 
 ### Practical 5 — Tic Tac Toe
 > Space-themed Tic Tac Toe with animated stars, scoreboard, 2-player mode, and a built-in AI opponent.
 
-![Tic Tac Toe](screenshots/p5_tictactoe.png)
+<img width="1320" height="841" alt="Screenshot 2026-04-09 120248" src="https://github.com/user-attachments/assets/a89aae65-c70a-4099-b671-c583b4170282" />
 
 ---
 
 ### Practical 6 — Matrix Operations (Input & Transpose)
 > IBM-style engineering tool with configurable matrix dimensions and operations like Transpose, Determinant, Row/Column Sums.
 
-![Matrix Input](screenshots/p6_matrix_ops.png)
+<img width="1300" height="807" alt="Screenshot 2026-04-09 120333" src="https://github.com/user-attachments/assets/937e8bb8-30bb-4ca6-be11-7ef988cc9e8e" />
 
-![Matrix Transpose Result](screenshots/p6_matrix_transpose.png)
+<img width="1297" height="792" alt="Screenshot 2026-04-09 120350" src="https://github.com/user-attachments/assets/96b03b88-975d-4bb5-9466-c4b3db28ff46" />
 
 ---
 
 ### Practical 7 — Hospital Registration Form
 > Multi-section patient registration form with a 4-step progress bar, real-time JS validation, and a success screen.
 
-![Hospital Form](screenshots/p7_hospital_form.png)
+<img width="1308" height="850" alt="Screenshot 2026-04-09 120420" src="https://github.com/user-attachments/assets/1462ded0-6a5f-4cf5-8042-aaaba6214f87" />
 
 ---
 
 ### Practical 10 — XML Student Registry
 > Dark navy dashboard that parses student XML data, displays records with filters, CGPA badges, and a live XML node viewer.
 
-![XML Students](screenshots/p10_xml_students.png)
+<img width="1306" height="829" alt="Screenshot 2026-04-09 120452" src="https://github.com/user-attachments/assets/7b07f4df-ad96-4ad1-bd14-05ac19b35616" />
 
 ---
 
